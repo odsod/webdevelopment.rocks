@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+#
+# Time-saving script to bootstrap our fresh server.
+# 
+# Installs a couple of packages we're gonna need.
+
+set -e
+
+apt-get update
+apt-get upgrade -y
+
+# Need this to add more package repositories
+apt-get install -y python-software-properties
+
+# Install mosh, good for live programming over SSH
+add-apt-repository -y ppa:keithw/mosh
+apt-get update
+apt-get install -y mosh
+
+# Let's use a more recent git version than Ubuntu LTS's
+add-apt-repository -y ppa:git-core/ppa
+apt-get update
+apt-get install -y git
+
+# Gonna need to download some files
+apt-get install -y curl
