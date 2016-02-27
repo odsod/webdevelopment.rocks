@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+#
+# Time-saving script to create a user on our fresh server.
+#
+# Creates the user, sets up permissions, and downloads some dotfiles.
+
+usage() {
+  {
+    echo 'Usage:'
+    echo '  create-user <user>'
+    echo
+    echo 'Example:'
+    echo '  create-user poscar' 
+  } 1>&2
+}
+
+set -e
+
+user=$1
+group=$user
+
+[[ $user ]] || { usage; exit 1; } 
+
+# Create our user and its group
+addgroup "$group"
+useradd "$user" --create-home --shell /bin/bash --gid "$group"
+
+# Authorize us to log in as the user over SSH
+mkdir -p "/home/${user}/.ssh"
+chmod 700 "/home/${user}/.ssh"
+cp /root/.ssh/authorized_keys "/home/${user}/.ssh"
+chown -R "${user}:${group}" "/home/${user}/.ssh"
+
+# Authorize the user for passwordless sudo
+echo "${user} ALL=(ALL) NOPASSWD:ALL" > "/etc/sudoers.d/${user}"
+
+# And we're done!
+echo "User ${user} created successfully!"
+
+# Now we can end our SSH session as root, and log back in as our user
+
+# OPTIONAL
+# $HOME is where our dotfiles are
+if [[ $user == 'poscar' ]]; then
+  curl https://raw.githubusercontent.com/odsod/pbox/master/roles/bash/files/inputrc -o "/home/${user}/.inputrc"
+  chown "${user}:${group}" "/home/${user}/.inputrc"
+  curl https://raw.githubusercontent.com/odsod/pbox/master/roles/neovim/files/init.vim -o "/home/${user}/.config/nvim/init.vim" --create-dirs 
+  curl https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim -o "/home/${user}/.config/nvim/autoload/plug.vim" --create-dirs
+  chown -R "${user}:${group}" "/home/${user}/.config"
+
+  # I use vim to edit files over SSH
+  add-apt-repository -y ppa:neovim-ppa/unstable
+  apt-get update
+  apt-get install -y neovim
+  update-alternatives --install /usr/bin/vim vim /usr/bin/nvim 60
+fi
