@@ -1,0 +1,15 @@
+html {
+  overflow-y: scroll;
+}
+
+body {
+  margin-top: 20px;
+}
+
+#chat-input {
+  margin-bottom: 20px;
+}
+
+.container {
+  max-width: 500px;
+}
