@@ -53,4 +53,7 @@ if [[ $user == 'poscar' ]]; then
   apt-get update
   apt-get install -y neovim
   update-alternatives --install /usr/bin/vim vim /usr/bin/nvim 60
+  update-alternatives --config vim
+
+  echo 'export THEME_NAME="contrast"' >> /home/poscar/.bashrc
 fi
